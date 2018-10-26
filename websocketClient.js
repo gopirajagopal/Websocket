@@ -6,7 +6,6 @@ var request = require('request');
 const  wsurl = "wss://va.msg.liveperson.net/ws_api/account/13350576/messaging/consumer?v=3";
 
 //global variables.
-var jwttoken="";
 var CreateResponse={};
 
 //get jwt
@@ -15,13 +14,10 @@ request.post(
     { json: { key: 'value' } },
     function (error, response, body) {
        if (!error && response.statusCode == 200) {
-            jwttoken = body.jwt;   
-            
-
-
+         
           var header = {
               headers: {
-                  "Authorization" : "JWT " + jwttoken
+                  "Authorization" : "JWT " + body.jwt
               }
           };
 
