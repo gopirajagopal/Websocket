@@ -4,38 +4,68 @@ var request = require('request');
 
 //constants
 const  wsurl = "wss://va.msg.liveperson.net/ws_api/account/13350576/messaging/consumer?v=3";
+const jwturl="https://va.idp.liveperson.net/api/account/13350576/signup";
 
 //global variables.
 var CreateResponse={};
 
+
+
+function connect() {
+    return new Promise(function(resolve, reject) {
+ 
+ var  jwtHeader;
+
 //get jwt
 request.post(
-    'https://va.idp.liveperson.net/api/account/13350576/signup',
+    jwturl,
     { json: { key: 'value' } },
     function (error, response, body) {
-       if (!error && response.statusCode == 200) {
-         
-          var header = {
+      if(response.statusCode == 200) {
+        var  jwtHeader = body.jwt;
+        resolve(jwtHeader);
+      }
+      else{
+        reject(new Error('statusCode=' + res.statusCode));
+      }
+    });
+})
+};
+
+
+
+
+      //create a web socket
+connect().then(function(jwtHeader){
+ var header = {
               headers: {
-                  "Authorization" : "JWT " + body.jwt
+                  "Authorization" : "JWT " + jwtHeader
               }
-          };
+          };    
+    
+  var ws = new WebSocket(wsurl, header);
+      ws.addEventListener('error', function (err) {
+      console.log("Error Creating Web Socket");
+      console.log('========== EXIT =========');
+      });
+      createConversationId(ws);
+      sendMessage(ws);     
+
+}).catch(function(err) {
+    console.log("error");
+});
 
 
-
-//create a web socket
-          var ws = new WebSocket(wsurl, header);
-              ws.addEventListener('error', function (err) {
-                console.log("Error Creating Web Socket");
-                console.log('========== EXIT =========');
-              });
-
-//send a message to create a conversationid
+  //send a message to create a conversationid
+function createConversationId(ws){
               ws.addEventListener('open', () => {
                 ws.send('{"kind":"req","id":1,"type":"cm.ConsumerRequestConversation"}');
               });
-              
-//send message
+}
+
+
+  //send message
+function sendMessage(ws){
               ws.addEventListener('message', event => {
                 console.log(`Message from server: ${event.data}`);
                 CreateResponse = JSON.parse(event.data);
@@ -43,11 +73,5 @@ request.post(
 
               ws.close(); 
               });
-       }  
+}
 
- else if (error) {
-             console.error("error creating JWT");
-                 }
-              }
-
-);
