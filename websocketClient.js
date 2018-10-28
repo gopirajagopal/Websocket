@@ -15,7 +15,6 @@ function connect() {
     return new Promise(function(resolve, reject) {
  
  var  jwtHeader;
-
 //get jwt
 request.post(
     jwturl,
@@ -41,7 +40,7 @@ connect().then(function(jwtHeader){
               headers: {
                   "Authorization" : "JWT " + jwtHeader
               }
-          };    
+          };
     
   var ws = new WebSocket(wsurl, header);
       ws.addEventListener('error', function (err) {
@@ -52,7 +51,7 @@ connect().then(function(jwtHeader){
       sendMessage(ws);     
 
 }).catch(function(err) {
-    console.log("error");
+    console.log(err);
 });
 
 
@@ -60,7 +59,7 @@ connect().then(function(jwtHeader){
 function createConversationId(ws){
               ws.addEventListener('open', () => {
                 ws.send('{"kind":"req","id":1,"type":"cm.ConsumerRequestConversation"}');
-              });
+});
 }
 
 
@@ -72,6 +71,6 @@ function sendMessage(ws){
                     ws.send('{"kind":"req","id":2,"type":"ms.PublishEvent","body":{"dialogId":"'+CreateResponse.body.conversationId+'","event":{"type":"ContentEvent","contentType":"text/plain","message":"Test Message"}}}');
 
               ws.close(); 
-              });
+ });
 }
 
